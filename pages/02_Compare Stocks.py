@@ -16,6 +16,42 @@ def st_fetch_prices(stock_code, start_date, end_date):
     # Create local version of the function that is cached
     return fetch_prices(stock_code, start_date, end_date)
 
+def combine_columns(df_dict, column):
+    """
+    Combine a specified column from multiple pandas DataFrames with the same index and columns.
+
+    Parameters:
+    -----------
+    df_dict : dict
+        A dictionary containing pandas DataFrames as values and their descriptive names as keys.
+    column : str
+        The name of the column to extract from each DataFrame.
+
+    Returns:
+    --------
+    result : pandas.DataFrame
+        A new DataFrame containing the specified column from each input DataFrame.
+        The column names of the new DataFrame correspond to the dictionary keys of the input DataFrames.
+    """
+    combined_columns = []
+
+    for key, df in df_dict.items():
+        temp_df = df[[column]].rename(columns={column: key})
+        combined_columns.append(temp_df)
+
+    result = pd.concat(combined_columns, axis=1)
+    return result
+
+def format_table(df, float_format='{:.2f}'):
+    # Create copy with appropriate formatting for display
+    formatted_df = df.copy()
+    formatted_df.index = formatted_df.index.strftime('%Y-%m-%d')
+    for col in formatted_df.columns:
+        if pd.api.types.is_float_dtype(formatted_df[col]):
+            formatted_df[col] = formatted_df[col].apply(lambda x: float_format.format(x))
+    return formatted_df
+
+
 def plot_prices(df_dict, column):
     fig = go.Figure()
 
@@ -88,3 +124,8 @@ if st.button("Analyze"):
         fig = plot_prices(prices, plotted_price_type)
         st.plotly_chart(fig, use_container_width=True)
 
+        with st.expander("Price table"):
+            st.write(f"The table below shows the adjusted daily {plotted_price_type} prices for the selected stocks.")
+            df = combine_columns(prices, plotted_price_type)
+            df = format_table(df)
+            st.dataframe(df)
