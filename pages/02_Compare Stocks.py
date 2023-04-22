@@ -11,6 +11,16 @@ plotted_price_type = 'close'
 stock_codes_default = ["AAPL", "GOOG", "MSFT", "META", "AMZN"]
 plot_width = 800
 plot_height = 600
+
+custom_css_expander = """
+<style>
+div[data-testid="stExpander"] div[role="button"] p {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+</style>
+"""
+
 @st.cache
 def st_fetch_prices(stock_code, start_date, end_date):
     # Create local version of the function that is cached
@@ -50,7 +60,6 @@ def format_table(df, float_format='{:.2f}'):
         if pd.api.types.is_float_dtype(formatted_df[col]):
             formatted_df[col] = formatted_df[col].apply(lambda x: float_format.format(x))
     return formatted_df
-
 
 def plot_prices(df_dict, column):
     fig = go.Figure()
@@ -103,9 +112,7 @@ stock_codes = sorted(list(set([s for s in stock_codes if s])))
 
 cols2 = st.columns(2)
 start_date = cols2[0].date_input("Analysis Start Date:", date.today() - timedelta(days=365))
-#start_date = start_date.strftime("%Y-%m-%d")
 end_date = cols2[1].date_input("Analysis End Date:", date.today())
-#end_date = end_date.strftime("%Y-%m-%d")
 
 if st.button("Analyze"):
     prices, failed_stocks = {}, []
@@ -124,6 +131,7 @@ if st.button("Analyze"):
         fig = plot_prices(prices, plotted_price_type)
         st.plotly_chart(fig, use_container_width=True)
 
+        st.markdown(custom_css_expander, unsafe_allow_html=True)
         with st.expander("Price table"):
             st.write(f"The table below shows the adjusted daily {plotted_price_type} prices for the selected stocks.")
             df = combine_columns(prices, plotted_price_type)
