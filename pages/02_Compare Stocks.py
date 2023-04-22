@@ -11,6 +11,10 @@ plotted_price_type = 'close'
 stock_codes_default = ["AAPL", "GOOG", "MSFT", "META", "AMZN"]
 plot_width = 800
 plot_height = 600
+@st.cache
+def st_fetch_prices(stock_code, start_date, end_date):
+    # Create local version of the function that is cached
+    return fetch_prices(stock_code, start_date, end_date)
 
 def plot_prices(df_dict, column):
     fig = go.Figure()
@@ -21,11 +25,37 @@ def plot_prices(df_dict, column):
     fig.update_layout(xaxis_title='Date',
                     yaxis_title=f"Adjusted {column.capitalize()} price",
                     width=plot_width,   # Set the width of the plot
-                    height=plot_height  # Set the height of the plot
-                    )
+                    height=plot_height,  # Set the height of the plot
+                    plot_bgcolor = 'white',  # Set the figure background color to white
+                    # xaxis = dict(
+                    #     gridcolor='lightgray',  # Set the x-axis grid lines color to light gray
+                    #     line=dict(color='black', width=1)  # Add a border around the figure
+                    # ),
+                    # yaxis = dict(
+                    #     gridcolor='lightgray',  # Set the y-axis grid lines color to light gray
+                    #     line=dict(color='black', width=1)  # Add a border around the figure
+                    # ),
+                    margin = dict(l=10, r=10, t=30, b=10)  # Adjust the margins to ensure the border is visible
+
+    )
+
+    fig.update_xaxes(
+        gridcolor='lightgray',  # Set the x-axis grid lines color to light gray
+        linecolor='black',  # Add a border around the figure
+        linewidth=1,
+        mirror=True
+    )
+
+    fig.update_yaxes(
+        gridcolor='lightgray',  # Set the y-axis grid lines color to light gray
+        linecolor='black',  # Add a border around the figure
+        linewidth=1,
+        mirror=True
+    )
 
     return fig
 
+st.set_page_config(layout="wide")
 st.title("Compare Stocks")
 
 cols1 = st.columns(n_stocks)
@@ -44,7 +74,7 @@ end_date = cols2[1].date_input("Analysis End Date:", date.today())
 if st.button("Analyze"):
     prices, failed_stocks = {}, []
     for stock in stock_codes:
-        df = fetch_prices(stock, start_date, end_date)
+        df = st_fetch_prices(stock, start_date, end_date)
         if df is not None:
             prices[stock] = df
         else:
