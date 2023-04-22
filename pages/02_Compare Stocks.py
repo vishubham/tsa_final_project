@@ -1,15 +1,39 @@
 # Code for the Compare Stocks page
 import streamlit as st
 from datetime import date, timedelta
+import plotly.graph_objs as go
+import pandas as pd
+from stock_quant import fetch_prices
+
+# app parameters
+n_stocks = 5
+plotted_price_type = 'close'
+stock_codes_default = ["AAPL", "GOOG", "MSFT", "META", "AMZN"]
+plot_width = 800
+plot_height = 600
+
+def plot_prices(df_dict, column):
+    fig = go.Figure()
+
+    for key, df in df_dict.items():
+        fig.add_trace(go.Scatter(x=df.index, y=df[column], mode='lines', name=key))
+
+    fig.update_layout(xaxis_title='Date',
+                    yaxis_title=f"Adjusted {column.capitalize()} price",
+                    width=plot_width,   # Set the width of the plot
+                    height=plot_height  # Set the height of the plot
+                    )
+
+    return fig
 
 st.title("Compare Stocks")
 
-cols1 = st.columns(5)
-stock_code1 = cols1[0].text_input("Stock 1 Code:", "AAPL")
-stock_code2 = cols1[1].text_input("Stock 2 Code:", "GOOG")
-stock_code3 = cols1[2].text_input("Stock 3 Code:", "MSFT")
-stock_code4 = cols1[3].text_input("Stock 4 Code:", "META")
-stock_code5 = cols1[4].text_input("Stock 5 Code:", "AMZN")
+cols1 = st.columns(n_stocks)
+stock_codes = []
+for i in range(n_stocks):
+    stock_codes.append(cols1[i].text_input(f"Stock code {i + 1}:", stock_codes_default[i], max_chars = 4))
+# Make stock codes sorted and unique and remove empty values
+stock_codes = sorted(list(set([s for s in stock_codes if s])))
 
 cols2 = st.columns(2)
 start_date = cols2[0].date_input("Analysis Start Date:", date.today() - timedelta(days=365))
@@ -17,13 +41,20 @@ start_date = cols2[0].date_input("Analysis Start Date:", date.today() - timedelt
 end_date = cols2[1].date_input("Analysis End Date:", date.today())
 #end_date = end_date.strftime("%Y-%m-%d")
 
-st.button("Analyze")
+if st.button("Analyze"):
+    prices, failed_stocks = {}, []
+    for stock in stock_codes:
+        df = fetch_prices(stock, start_date, end_date)
+        if df is not None:
+            prices[stock] = df
+        else:
+            failed_stocks.append(stock)
+    if len(failed_stocks) > 0:
+        st.error(f"Stock code does not exist: {', '.join(failed_stocks)}")
 
-# loop to call function to fetch the data from yahoo finance
-    # if stock code does not exist
-    # cols1[i] https://streamlit-emoji-shortcodes-streamlit-app-gwckff.streamlit.app/
+    if prices:
+        st.subheader("")
+        st.subheader(f"Adjusted Daily {plotted_price_type.capitalize()} Prices")
+        fig = plot_prices(prices, plotted_price_type)
+        st.plotly_chart(fig, use_container_width=True)
 
-st.subheader("")
-st.subheader("Adjusted Daily Close Prices")
-# call function to Plot the Adjusted Daily Close Prices
-st.image("https://clauswilke.com/dataviz/balance_data_context_files/figure-html/price-plot-hgrid-1.png")
