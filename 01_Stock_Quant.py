@@ -16,5 +16,5 @@ _Stock Quant_ is a quantitative stock app that can pull time series data for any
 
 st.write("""
 ### Developed By
-__Shubham Saurabh__  \n__Constantinos Vogiatzis__  \n__Seth Smithson__  \nLuddy School of Informatics, Computing, and Engineering, Indiana University, Bloomington  \nDSCI D590 Time Series Analysis, Final Project, Spring 2023  \nDr. Olga Scrivner  \nApr 15, 2023  \n  \nLast updated on: Apr 15, 2023
+__Shubham Saurabh__  \n__Constantinos Vogiatzis__  \n__Seth Smithson__  \nLuddy School of Informatics, Computing, and Engineering, Indiana University, Bloomington  \nDSCI D590 Time Series Analysis, Final Project, Spring 2023  \nDr. Olga Scrivner  \nApr 15, 2023  \n  \nLast updated on: Apr 23, 2023
 """)

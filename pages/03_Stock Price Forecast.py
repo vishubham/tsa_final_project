@@ -1,10 +1,12 @@
 # Code for the Forecasting page
 import streamlit as st
 from datetime import date, timedelta
+import pandas as pd
+from stock_quant import fetch_daily_prices
 
 st.title("Stock Price Forecast")
 
-stock_code = st.text_input("NYSE Stock Code:", "AAPL")
+stock_code = st.text_input("NYSE Stock Code:", "AAPL", max_chars = 4)
 col1, col2 = st.columns(2)
 
 train_start_date = col1.date_input("Training Start Date:", date.today() - timedelta(days=3650))
@@ -17,20 +19,28 @@ forecast_start_date = forecast_start_date.strftime("%Y-%m-%d")
 forecast_end_date = col2.date_input("Forecast End Date:", date.today() + timedelta(days=365))
 forecast_end_date = forecast_end_date.strftime("%Y-%m-%d")
 
-st.button("Predict")
+if st.button("Predict"):
+    # Fetch the daily adjusted prices
+    data = fetch_daily_prices(stock_code, train_start_date, forecast_end_date, adjust_all = True)
 
-# call function to fetch the data from yahoo finance
+    if len(data) == 0:
+        st.write("Invalid stock code or no data found. Please verify stock code and try again.")
 
-# display raw data in a collapsible section
-raw_data = st.expander("Raw Data")
-#raw_data.write(data)
+    # display raw data in a collapsible section
+    raw_data = st.expander("Raw Data")
+    raw_data.write(data)
 
-st.subheader("Forecast for " + stock_code)
-# Plot the forecast
-"""
-Placeholder for plot containing lines for:
-1.	Train values
-2.	Test values
-3.	Forecasted values
-4.	Confidence interval band
-"""
+    st.subheader("Forecast for " + stock_code)
+ 
+    from PIL import Image
+    image = Image.open('Dummy_prediction.png')
+    st.image(image)
+
+    # Plot the forecast
+#    """
+#    Placeholder for plot containing lines for:
+#    1.	Train values
+#    2.	Test values
+#    3.	Forecasted values
+#    4.	Confidence interval band
+#    """
