@@ -97,7 +97,8 @@ st.title("Compare Stocks")
 cols1 = st.columns(n_stocks)
 stock_codes = []
 for i in range(n_stocks):
-    stock_codes.append(cols1[i].text_input(f"Stock code {i + 1}:", stock_codes_default[i], max_chars = 4))
+    stock_codes.append(cols1[i].text_input(f"Stock code {i + 1}:", stock_codes_default[i], max_chars = 5))
+    # There are 48 stocks having 5 character ticker symbols listed on the NYSE.
 # Make stock codes sorted and unique and remove empty values
 stock_codes = sorted(list(set([s for s in stock_codes if s])))
 

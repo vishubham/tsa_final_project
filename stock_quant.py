@@ -1,7 +1,6 @@
 import pandas as pd
 from datetime import datetime
 import yfinance as yf
-# import plotly.graph_objs as go
 
 
 def fetch_prices(stock_code, start_date, end_date):
